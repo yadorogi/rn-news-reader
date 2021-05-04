@@ -1,60 +1,47 @@
-import React from "react";
-import { StyleSheet, View, Image, Text } from "react-native";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, View, FlatList, SafeAreaView } from "react-native";
+import axios from "axios";
+import Constants from "expo-constants";
 import ListItem from "./components/ListItem";
+
+const URL = `https://newsapi.org/v2/top-headlines?country=jp&category=business&apiKey=${Constants.manifest.extra.newsApiKey}`;
+
+export default function App() {
+  const [articles, setArticles] = useState([]);
+
+  useEffect(() => {
+    fetchArticles();
+  }, []);
+
+  const fetchArticles = async () => {
+    try {
+      const response = await axios.get(URL);
+      setArticles(response.data.articles);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={articles}
+        renderItem={({ item }) => (
+          <ListItem
+            imageUrl={item.urlToImage}
+            title={item.title}
+            author={item.author}
+          />
+        )}
+        keyExtractor={(item, index) => index.toString()}
+      />
+    </SafeAreaView>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  itemContainer: {
-    height: 100,
-    width: "100%",
-    borderColor: "gray",
-    borderWidth: 1,
-    flexDirection: "row",
-  },
-  leftContainer: {
-    width: 100,
-  },
-  rightContainer: {
-    flex: 1,
-    padding: 10,
-    justifyContent: "space-between",
-  },
-  text: {
-    fontSize: 16,
-  },
-  subText: {
-    fontSize: 12,
-    color: "gray",
   },
 });
-
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <ListItem
-        imageUrl="https://picsum.photos/id/10/200/200"
-        title="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation"
-        author="SampleNews"
-      />
-      <ListItem
-        imageUrl="https://picsum.photos/id/10/200/200"
-        title="exercitation"
-        author="SampleNews"
-      />
-      <ListItem
-        imageUrl="https://picsum.photos/id/10/200/200"
-        title="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation"
-        author="SampleNews"
-      />
-    </View>
-  );
-}
